@@ -33,7 +33,7 @@ resource "aws_security_group" "blog_instance_sg" {
   name        = "blog_instance_sg"
   description = "Allow http and https request as in and allow all as out"
   
-  vpc_id      = aws_vpc.default.id
+  vpc_id      = data.aws_vpc.default.id
 }
 
 resource "aws_security_group_rule" "blog_http_in" {
