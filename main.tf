@@ -18,7 +18,7 @@ resource "aws_instance" "blog" {
   ami                    = data.aws_ami.app_ami.id
   instance_type          = var.instance_type
 
-  vpc_security_group_ids = [aws_security_group.blog_instance_sg.id]
+  vpc_security_group_ids = [module.blog_sg.security_group_id]
 
   tags = {
     Name = "Learing terraform"
@@ -27,6 +27,23 @@ resource "aws_instance" "blog" {
 
 data "aws_vpc" "default" {
   default = true
+}
+
+module "blog_sg" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "5.1.0"
+
+  name        = "blog_instance_sg new"
+  description = "Allow http and https request as in and allow all as out"
+
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress_cidr_blocks      = ["0.0.0.0/0"]
+  ingress_rules            = ["http-80-tcp", "http-8080-tcp"]
+
+  egress_cidr_blocks      = ["0.0.0.0/0"]
+  egress_rules            = ["all-all"]
+
 }
 
 resource "aws_security_group" "blog_instance_sg" {
