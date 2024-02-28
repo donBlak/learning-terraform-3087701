@@ -17,6 +17,8 @@ data "aws_ami" "app_ami" {
 resource "aws_instance" "blog" {
   ami                    = data.aws_ami.app_ami.id
   instance_type          = var.instance_type
+  
+  subnet_id     = module.blog-vpc.public_subnets[0]
 
   vpc_security_group_ids = [module.blog_sg.security_group_id]
 
@@ -29,6 +31,21 @@ data "aws_vpc" "default" {
   default = true
 }
 
+module "blog_vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  name = "dev"
+  cidr = "10.0.0.0/16"
+
+  azs             = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+  tags = {
+    Terraform = "true"
+    Environment = "dev"
+  }
+}
+
 module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.0"
@@ -36,7 +53,7 @@ module "blog_sg" {
   name        = "blog_instance_sg new"
   description = "Allow http and https request as in and allow all as out"
 
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = module.blog_vpc.vpc_id
 
   ingress_cidr_blocks      = ["0.0.0.0/0"]
   ingress_rules            = ["http-80-tcp", "https-443-tcp"]
