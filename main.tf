@@ -63,10 +63,10 @@ module "blog_sg" {
 
 }
 
-module "blog-alb" {
+module "blog_alb" {
   source = "terraform-aws-modules/alb/aws"
 
-  name    = "blog_alb"
+  name    = "blog-alb"
   vpc_id  = module.blog_vpc.vpc_id
   subnets = module.blog_vpc.public_subnets
 
@@ -86,12 +86,7 @@ module "blog-alb" {
       protocol         = "HTTP"
       port             = 80
       target_type      = "instance"
-      targets = {
-        blog_vm_target = {
-          target_id = aws_instance.blog.id
-          port      = 80
-        }    
-      }
+      target_id = aws_instance.blog.id
     }
   ]
 
