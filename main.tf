@@ -63,7 +63,7 @@ module "blog_sg" {
 
 }
 
-module "blog_alb" {
+module "blog-alb" {
   source = "terraform-aws-modules/alb/aws"
 
   name    = "blog_alb"
