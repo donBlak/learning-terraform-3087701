@@ -14,20 +14,21 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
-resource "aws_instance" "blog" {
-  ami                    = data.aws_ami.app_ami.id
-  instance_type          = var.instance_type
+module "blog-autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "7.4.0"
+  
+  name     = "blog-as"
+  min_size = 1
+  max_size = 2
+  
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb.target_group_arns
+  security_groups     = [module.blog_sg.security_group_id]
+  instance_type       = var.instance_type
+  image_id            = data.aws_ami.app_ami.id
 
-  subnet_id     = module.blog_vpc.public_subnets[0]
-
-  vpc_security_group_ids = [module.blog_sg.security_group_id]
-
-  tags = {
-    Name = "Learing terraform"
-  }
 }
-
-
 
 data "aws_vpc" "default" {
   default = true
@@ -92,7 +93,6 @@ module "blog_alb" {
       protocol         = "HTTP"
       port             = 80
       target_type      = "instance"
-      target_id        = aws_instance.blog.id
     }
   }
 
