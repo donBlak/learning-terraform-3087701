@@ -50,7 +50,7 @@ module "blog_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "5.1.0"
 
-  name        = "blog_instance_sg new"
+  name        = "blog_instance_sg_new"
   description = "Allow http and https request as in and allow all as out"
 
   vpc_id      = module.blog_vpc.vpc_id
