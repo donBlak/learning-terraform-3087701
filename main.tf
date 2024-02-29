@@ -62,3 +62,41 @@ module "blog_sg" {
   egress_rules            = ["all-all"]
 
 }
+
+module "blog_alb" {
+  source = "terraform-aws-modules/alb/aws"
+
+  name    = "blog_alb"
+  vpc_id  = module.blog_vpc.vpc_id
+  subnets = module.blog.public_subnets
+
+  # Security Group
+  security_groups = [module.blog_sg.security_group_id]
+
+  listeners = [
+    {
+      port     = 80
+      protocol = "HTTP"
+    }
+  ]
+
+  target_groups = [
+    {
+      name_prefix      = "blog-"
+      protocol         = "HTTP"
+      port             = 80
+      target_type      = "instance"
+      targets = {
+        blog_vm_target = {
+          target_id = aws_instance.blog.id
+          port      = 80
+        }    
+      }
+    }
+  ]
+
+  tags = {
+    Environment = "Development"
+    Project     = "Example"
+  }
+}
