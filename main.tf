@@ -27,7 +27,21 @@ resource "aws_instance" "blog" {
   }
 }
 
+module "blog-autoscaling" {
+  source  = "terraform-aws-modules/autoscaling/aws"
+  version = "7.4.0"
+  
+  name     = "blog-as"
+  min_size = 1
+  max_size = 2
+  
+  vpc_zone_identifier = module.blog_vpc.public_subnets
+  target_group_arns   = module.blog_alb.target_group_arns
+  security_groups     = [module.blog_sg.security_group_id]
+  instance_type       = var.instance_type
+  image_id            = data.aws_ami.app_ami.id
 
+}
 
 data "aws_vpc" "default" {
   default = true
@@ -95,6 +109,8 @@ module "blog_alb" {
       target_id        = aws_instance.blog.id
     }
   }
+
+  enable_deletion_protection = false
 
   tags = {
     Environment = "Development"
