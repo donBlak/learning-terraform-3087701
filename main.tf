@@ -73,22 +73,22 @@ module "blog_alb" {
   # Security Group
   security_groups = [module.blog_sg.security_group_id]
 
-  listeners = [
-    {
+  listeners = {
+    http-listner = {
       port     = 80
       protocol = "HTTP"
     }
-  ]
+  }
 
-  target_groups = [
-    {
+  target_groups = {
+    blog-target = {
       name_prefix      = "blog-"
       protocol         = "HTTP"
       port             = 80
       target_type      = "instance"
       target_id = aws_instance.blog.id
     }
-  ]
+  }
 
   tags = {
     Environment = "Development"
